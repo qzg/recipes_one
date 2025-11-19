@@ -15,9 +15,9 @@ impl CostRepository {
     /// Save a cost analysis run
     pub async fn save_analysis(&self, analysis: &CostAnalysis) -> Result<(), sqlx::Error> {
         let breakdown_json = serde_json::to_value(&analysis.breakdown)
-            .map_err(|e| sqlx::Error::Encode(Box::new(e)))?;
+            .map_err(|e| sqlx::Error::decode(e))?;
         let source_str = serde_json::to_string(&analysis.source)
-            .map_err(|e| sqlx::Error::Encode(Box::new(e)))?
+            .map_err(|e| sqlx::Error::decode(e))?
             .trim_matches('"').to_string();
 
         sqlx::query!(
@@ -79,7 +79,7 @@ impl CostRepository {
     /// Add or update pricing catalog entry
     pub async fn upsert_catalog_entry(&self, entry: &PricingCatalogEntry) -> Result<(), sqlx::Error> {
         let source_str = serde_json::to_string(&entry.source)
-            .map_err(|e| sqlx::Error::Encode(Box::new(e)))?
+            .map_err(|e| sqlx::Error::decode(e))?
             .trim_matches('"').to_string();
 
         sqlx::query!(

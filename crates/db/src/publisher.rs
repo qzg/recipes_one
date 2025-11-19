@@ -21,7 +21,7 @@ impl PublisherRepository {
         job_type: PublishJobType,
     ) -> Result<PublishJob, sqlx::Error> {
         let job_type_str = serde_json::to_string(&job_type)
-            .map_err(|e| sqlx::Error::Encode(Box::new(e)))?
+            .map_err(|e| sqlx::Error::decode(e))?
             .trim_matches('"').to_string();
 
         let job = sqlx::query!(
@@ -61,7 +61,7 @@ impl PublisherRepository {
         error: Option<String>,
     ) -> Result<(), sqlx::Error> {
         let status_str = serde_json::to_string(&status)
-            .map_err(|e| sqlx::Error::Encode(Box::new(e)))?
+            .map_err(|e| sqlx::Error::decode(e))?
             .trim_matches('"').to_string();
 
         sqlx::query!(
@@ -84,13 +84,13 @@ impl PublisherRepository {
     /// Save a generated asset
     pub async fn save_asset(&self, asset: &GeneratedAsset) -> Result<(), sqlx::Error> {
         let format_str = serde_json::to_string(&asset.format)
-            .map_err(|e| sqlx::Error::Encode(Box::new(e)))?
+            .map_err(|e| sqlx::Error::decode(e))?
             .trim_matches('"').to_string();
         let platform_str = asset.platform.as_ref()
             .and_then(|p| serde_json::to_string(p).ok())
             .map(|s| s.trim_matches('"').to_string());
         let hashtags_json = serde_json::to_value(&asset.hashtags)
-            .map_err(|e| sqlx::Error::Encode(Box::new(e)))?;
+            .map_err(|e| sqlx::Error::decode(e))?;
 
         sqlx::query!(
             r#"
